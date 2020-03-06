@@ -26,8 +26,14 @@ public class MainController {
     }
 
     @GetMapping("main")
-    public String main(Map<String, Object> model) {
-        model.put("messages", messageRepository.findAll());
+    public String main(@RequestParam String findedTag, Map<String, Object> model) {
+        if (findedTag == null || findedTag.isEmpty()) {
+            model.put("messages", messageRepository.findAll());
+        }
+        else {
+            model.put("messages", messageRepository.findAllByTag(findedTag));
+        }
+        model.put("filter", findedTag);
         return "main";
     }
 
@@ -38,12 +44,6 @@ public class MainController {
                         Map<String, Object> model) {
         messageRepository.save(new Message(text,tag, user));
         model.put("messages", messageRepository.findAll());
-        return "main";
-    }
-
-    @PostMapping("/find")
-    public String find(@RequestParam String findedTag, Map<String, Object> model) {
-        model.put("messages", messageRepository.findAllByTag(findedTag));
         return "main";
     }
 
