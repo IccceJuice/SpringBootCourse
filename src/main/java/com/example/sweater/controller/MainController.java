@@ -1,4 +1,4 @@
-package com.example.sweater;
+package com.example.sweater.controller;
 
 import com.example.sweater.dao.MessageRepository;
 import com.example.sweater.model.Message;
@@ -12,24 +12,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 
 @Controller
-public class GreetingController {
+public class MainController {
 
     @Autowired
     private MessageRepository messageRepository;
 
-    @GetMapping("/greeting")
+    @GetMapping("/")
     public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Map<String, Object> model) {
         model.put("name", name);
         return "greeting";
     }
 
-    @GetMapping
+    @GetMapping("main")
     public String main(Map<String, Object> model) {
         model.put("messages", messageRepository.findAll());
         return "main";
     }
 
-    @PostMapping("add")
+    @PostMapping("/add")
     public String add(@RequestParam String text, @RequestParam String tag,
             Map<String, Object> model) {
         messageRepository.save(new Message(text,tag));
@@ -37,7 +37,7 @@ public class GreetingController {
         return "main";
     }
 
-    @PostMapping("find")
+    @PostMapping("/find")
     public String find(@RequestParam String findedTag, Map<String, Object> model) {
         model.put("messages", messageRepository.findAllByTag(findedTag));
         return "main";
