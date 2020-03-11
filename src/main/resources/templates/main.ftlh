@@ -10,7 +10,13 @@
 
     <div>
         <form action="/main" method="post" enctype="multipart/form-data">
-            <input type="text" name="text" placeholder="Enter a text">
+            <input type="text" name="text" placeholder="Enter a text" class="${(textError??)?string('is-invalid', '')}"
+                value="<#if message??>${message.text}</#if>">
+            <#if textError??>
+                <div class="invalid-feedback">
+                    ${textError}
+                </div>
+            </#if>
             <input type="text" name="tag" placeholder="Enter a tag">
             <input type="file" name="file">
             <button type="submit">Enter</button>
