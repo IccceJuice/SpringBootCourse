@@ -9,9 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -25,14 +26,23 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    public boolean addUser(User user) {
+    public boolean addUser(User user, Map<String, String> form) {
         User userFromDB = userRepository.findByUsername(user.getUsername());
         if (userFromDB != null) {
             return false;
         }
 
+        Set<String> roles = Arrays.stream(Role.values())
+                .map(Role::name)
+                .collect(Collectors.toSet());
+        user.setRoles(new HashSet<>());
+        for (String role : form.keySet()) {
+            if (roles.contains(role)) {
+                user.getRoles().add(Role.valueOf(role));
+            }
+        }
+
         user.setActive(true);
-        user.setRoles(Collections.singleton(Role.USER));
         user.setActivationCode(UUID.randomUUID().toString());
         userRepository.save(user);
         if (!StringUtils.isEmpty(user.getEmail())) {
@@ -52,5 +62,40 @@ public class UserService implements UserDetailsService {
         user.setActivationCode(null);
         userRepository.save(user);
         return true;
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public void userSave(@RequestParam String username,
+                         @RequestParam Map<String, String> form,
+                         @RequestParam("userID") User user) {
+        user.setUsername(username);
+        Set<String> roles = Arrays.stream(Role.values())
+                .map(Role::name)
+                .collect(Collectors.toSet());
+
+        user.getRoles().clear();
+        for (String role : form.keySet()) {
+            if (roles.contains(role)) {
+                user.getRoles().add(Role.valueOf(role));
+            }
+        }
+        userRepository.save(user);
+    }
+
+    public void updateProfile(User user, String password, String email) {
+
+        String userEmail = user.getEmail();
+        boolean isEmailChanged = (email != null && !email.equals(userEmail)) || (userEmail != null && !userEmail.equals(email));
+        if (isEmailChanged) {
+            user.setEmail(email);
+        }
+
+        if (!StringUtils.isEmpty(password)) {
+            user.setPassword(password);
+        }
+        userRepository.save(user);
     }
 }

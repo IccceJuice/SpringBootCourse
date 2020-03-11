@@ -6,6 +6,7 @@
     <br>
     ${message?ifExists}
     <@l.login "/registration"/>
+
     <div>
         <a href="/login">Back to login</a>
     </div>

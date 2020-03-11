@@ -1,5 +1,6 @@
 package com.example.sweater.controller;
 
+import com.example.sweater.model.Role;
 import com.example.sweater.model.User;
 import com.example.sweater.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
+import java.util.Set;
 
 @Controller
 public class RegistrationController {
@@ -18,14 +21,16 @@ public class RegistrationController {
     private UserService userService;
 
     @GetMapping("/registration")
-    public String registration() {
+    public String registration(Model model) {
+        model.addAttribute("roles", Role.values());
         return "registration";
     }
 
     @PostMapping("/registration")
-    public String addUser(User user, Map<String, Object> model) {
-        if (!userService.addUser(user)) {
-            model.put("message", "User exists!");
+    public String addUser(User user,
+                          @RequestParam Map<String, String> form) {
+        if (!userService.addUser(user, form)) {
+            form.put("message", "User exists!");
             return "registration";
         }
         return "redirect:/login";
