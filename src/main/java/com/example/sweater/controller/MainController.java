@@ -78,6 +78,7 @@ public class MainController {
             }
             messageRepository.save(message);
         }
+        model.addAttribute("message", null);
         model.addAttribute("uploadPath", uploadPath + "\\");
         model.addAttribute("messages", messageRepository.findAll());
         return "main";

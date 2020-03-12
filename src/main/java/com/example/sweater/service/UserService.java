@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -26,23 +27,18 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Username not found!");
+        }
+
         return userRepository.findByUsername(username);
     }
 
-    public boolean addUser(User user, Map<String, String> form) {
+    public boolean addUser(User user) {
         User userFromDB = userRepository.findByUsername(user.getUsername());
         if (userFromDB != null) {
             return false;
-        }
-
-        Set<String> roles = Arrays.stream(Role.values())
-                .map(Role::name)
-                .collect(Collectors.toSet());
-        user.setRoles(new HashSet<>());
-        for (String role : form.keySet()) {
-            if (roles.contains(role)) {
-                user.getRoles().add(Role.valueOf(role));
-            }
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
